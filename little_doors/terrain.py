@@ -1,3 +1,5 @@
+from typing import Optional, Any, List, Union
+
 import pyglet
 
 from little_doors.iso import cart_to_iso
@@ -63,13 +65,9 @@ class Terrain(object):
             self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32, y=j * 32)
 
     def draw(self):
-        for sprite in self._sprites:
-            if sprite:
-                sprite.draw()
-
         (width, height) = self._size
         for x in range(width-1, -1, -1):
             for y in range(height-1, -1, -1):
-                sprite = self._sprites[x + y * width]
+                sprite = self._sprites[x + y * width]  # type: Optional[pyglet.sprite.Sprite]
                 if sprite:
                     sprite.draw()
