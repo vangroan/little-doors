@@ -66,3 +66,10 @@ class Terrain(object):
         for sprite in self._sprites:
             if sprite:
                 sprite.draw()
+
+        (width, height) = self._size
+        for x in range(width-1, -1, -1):
+            for y in range(height-1, -1, -1):
+                sprite = self._sprites[x + y * width]
+                if sprite:
+                    sprite.draw()

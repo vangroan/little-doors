@@ -16,7 +16,6 @@ def on_draw():
 
 
 if __name__ == "__main__":
-    game.init()
-    game.camera.set_position(-640 * 0.25, -480 * 0.10)
-
+    game.start()
+    
     pyglet.app.run()
