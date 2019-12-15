@@ -12,6 +12,11 @@ class EventMixin(object):
     def __init__(self):
         self.__event_handlers = dict()
 
+    def register_event_types(self, *event_types):
+        for event in event_types:
+            if event not in self.__event_handlers:
+                self.__event_handlers[event] = []
+
     def handle(self, event_name, handler):
         """
         Registers a function to receive events with the given name.

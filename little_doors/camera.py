@@ -1,7 +1,9 @@
 from pyglet.gl import *
-import pyglet
+
+from little_doors.context import Context
 
 
+# noinspection PyMethodMayBeStatic
 class PixelCamera(object):
 
     def __init__(self):
@@ -9,6 +11,7 @@ class PixelCamera(object):
         self._y = 0.0
         self._width = 640 * 0.5
         self._height = 480 * 0.5
+        self._size_factor = 0.5
 
     @property
     def left(self):
@@ -20,11 +23,15 @@ class PixelCamera(object):
 
     @property
     def right(self):
-        return self._x + self._width
+        ctx = Context.current()
+        width = ctx.window.width * self._size_factor
+        return self._x + width
 
     @property
     def top(self):
-        return self._y + self._height
+        ctx = Context.current()
+        height = ctx.window.height * self._size_factor
+        return self._y + height
 
     @property
     def width(self):
@@ -37,6 +44,17 @@ class PixelCamera(object):
     def set_position(self, x, y):
         self._x = x
         self._y = y
+
+    def window_to_world(self, x, y):
+        """
+        Takes coordinates on the window and transforms them to a point in the world's space.
+
+        :returns: A tuple with the new x and y values
+        """
+        return x * self._size_factor, y * self._size_factor
+
+    def clear(self):
+        glClear(gl.GL_COLOR_BUFFER_BIT)
 
     def push_state(self):
         # Save the current matrix
@@ -57,6 +75,5 @@ class PixelCamera(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 
-    # noinspection PyMethodMayBeStatic
     def pop_state(self):
         glPopMatrix()

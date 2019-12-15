@@ -27,7 +27,7 @@ class PlayScene(Scene):
             1, 1, 1, 1, 1, 1, 1, 1,
         ])
 
-    def draw(self, context):
+    def on_draw(self, context):
         self.camera.push_state()
 
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)

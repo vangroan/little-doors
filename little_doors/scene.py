@@ -17,6 +17,18 @@ class Scene(ABC):
     def update(self, context):
         pass
 
+    def on_mouse_press(self, x, y, button, modifiers):
+        pass
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        pass
+
+    def on_mouse_motion(self, context, x, y, dx, dy):
+        pass
+
+    def on_draw(self, context):
+        pass
+
 
 class SceneStack(object):
     def __init__(self):
