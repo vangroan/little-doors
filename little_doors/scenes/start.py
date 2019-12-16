@@ -1,3 +1,5 @@
+import pyglet
+
 from little_doors.camera import PixelCamera
 from little_doors.context import Context
 from little_doors.menu import Menu, MenuButton
@@ -11,13 +13,16 @@ class StartScene(Scene):
 
         self.menu = Menu()
         self.menu.add(MenuButton(label="Play", x=96, y=200, on_release=self.on_play_release))
-        self.menu.add(MenuButton(label="Quit", x=96, y=128))
+        self.menu.add(MenuButton(label="Quit", x=96, y=128, on_release=self.on_quit_release))
 
     @staticmethod
     def on_play_release(*args, **kwargs):
         ctx = Context.current()
         ctx.game.scenes.push(PlayScene())
-        print("Play Clicked")
+
+    @staticmethod
+    def on_quit_release(*args, **kwargs):
+        pyglet.app.exit()
 
     def on_mouse_press(self, x, y, button, modifiers):
         x, y = self.camera.window_to_world(x, y)
