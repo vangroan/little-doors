@@ -29,6 +29,9 @@ class PlayScene(Scene):
             1, 1, 1, 1, 1, 1, 1, 1,
         ])
 
+    def on_update(self, dt):
+        self.player.update(dt)
+
     def on_draw(self, context):
         self.camera.push_state()
 

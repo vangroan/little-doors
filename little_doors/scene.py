@@ -14,7 +14,7 @@ class Scene(ABC):
     def resume(self, context):
         pass
 
-    def update(self, context):
+    def on_update(self, dt):
         pass
 
     def on_mouse_press(self, x, y, button, modifiers):

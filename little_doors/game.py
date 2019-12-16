@@ -29,6 +29,11 @@ class Game:
         if scene:
             scene.on_mouse_motion(None, x, y, dx, dy)
 
+    def on_update(self, dt):
+        scene = self._scenes.top
+        if scene:
+            scene.on_update(dt)
+
     def on_draw(self):
         scene = self._scenes.top
         if scene:

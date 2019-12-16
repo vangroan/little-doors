@@ -35,5 +35,5 @@ def on_draw():
 if __name__ == "__main__":
     with Context(game, window) as _ctx:
         game.start()
-
+        pyglet.clock.schedule_interval(game.on_update, 1.0 / 60.0)
         pyglet.app.run()
