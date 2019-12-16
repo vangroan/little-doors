@@ -37,6 +37,13 @@ class Terrain(object):
         self._aabbs = [None] * length  # type: List[Optional[AABB3D]]
         self._batch = pyglet.graphics.Batch()
 
+    @property
+    def tile_size_2d(self):
+        """
+        The standard size of a tile sprite in 2D screen space.
+        """
+        return 32.0, 32.0
+
     def load_tile_set(self, tile_set):
         self._tile_set.update(tile_set)
 
@@ -67,7 +74,8 @@ class Terrain(object):
                 raise TileSetError("tile set does not contain tile for index %s" % tile_index)
 
             (i, j, _k) = cart_to_iso(x, y, 0)
-            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32, y=j * 32)
+            (ax, ay) = tile.anchor
+            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32 - ax, y=j * 32 - ay)
 
             size = tile.size  # type: Optional[tuple[float, float]]
             self._aabbs[data_index] = AABB3D(x, y, tile.size[0], tile.size[1])

@@ -14,7 +14,7 @@ class Player(object):
 
         self._pos3d = (0.0, 0.0, 0.0)
         self._tile_size = tile_size
-        self._anchor = (12.0, 0.0)
+        self._anchor = (24.0, 8.0)
 
         self.walk_speed = 4.0
         self.mode = 0
@@ -38,7 +38,7 @@ class Player(object):
         (ti, tj, tk) = self._tile_size
         (ax, ay) = self._anchor
         self.sprite.x = (i * ti) - ax
-        self.sprite.y = (j * tj + k * tk) + ay
+        self.sprite.y = (j * tj + k * tk) - ay
         self._pos3d = val
 
     def update(self, dt):
@@ -57,11 +57,11 @@ class Player(object):
                 self.mode = 2
         elif self.mode == 2:
             self.pos3d = (p[0] - diff, p[1], p[2])
-            if self._pos3d[0] < 0.0:
+            if self._pos3d[0] <= 0.0:
                 self.mode = 3
         elif self.mode == 3:
             self.pos3d = (p[0], p[1] - diff, p[2])
-            if self._pos3d[1] < 0.0:
+            if self._pos3d[1] <= 0.0:
                 self.mode = 0
 
     def draw(self):

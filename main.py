@@ -37,3 +37,6 @@ if __name__ == "__main__":
         game.start()
         pyglet.clock.schedule_interval(game.on_update, 1.0 / 60.0)
         pyglet.app.run()
+
+        # Explicitly unschedule update to avoid weak ref exception
+        pyglet.clock.unschedule(game.on_update)
