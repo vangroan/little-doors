@@ -2,6 +2,7 @@ from pyglet import gl
 
 from little_doors import data
 from little_doors.camera import PixelCamera
+from little_doors.player import Player
 from little_doors.scene import Scene
 from little_doors.terrain import Terrain
 
@@ -10,6 +11,7 @@ class PlayScene(Scene):
     def __init__(self):
         self.terrain = Terrain((8, 8))
         self.camera = PixelCamera()
+        self.player = Player(pos3d=(0.0, 0.0, 1.0))
 
     def start(self, context):
         print("Start Play Scene")
@@ -32,5 +34,6 @@ class PlayScene(Scene):
 
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
         self.terrain.draw()
+        self.player.draw()
 
         self.camera.pop_state()
