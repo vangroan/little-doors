@@ -78,7 +78,7 @@ class Terrain(object):
             self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32 - ax, y=j * 32 - ay)
 
             size = tile.size  # type: Optional[tuple[float, float]]
-            self._aabbs[data_index] = AABB3D(x, y, tile.size[0], tile.size[1])
+            self._aabbs[data_index] = AABB3D(x, y, 0, tile.size[0], tile.size[1], 0)
 
     def draw(self):
         (width, height) = self._size
