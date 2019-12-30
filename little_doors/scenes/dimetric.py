@@ -36,6 +36,7 @@ class DimetricScene(Scene):
             1, 1, 1, 1, 1, 1, 1, 1,
         ])
 
+        pprint(self.terrain.get_cell_aabb3d(0, 0))
         pprint(hex_bounds(self.terrain.get_cell_aabb3d(0, 0)))
 
     def on_update(self, dt):

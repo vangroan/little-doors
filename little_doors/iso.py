@@ -57,13 +57,39 @@ def hex_bounds(aabb3d: AABB3D, pos=(0.0, 0.0, 0.0)):
     :param pos: Optional offset position in 3D cartesian space
     :return: Tuple with bounds (x1, x2, y1, y2, h1, h2, v1, v2)
     """
+    # TODO: This function can be made more effecient by only computing the required components.
     (ox, oy, oz) = pos
 
-    # TODO: All 6 corners of Hexagon
-    (x_min, y_min, h_min, v_min) = coord_to_hex(ox + aabb3d.x, oy + aabb3d.y + aabb3d.height, oz + aabb3d.z)
-    (x_max, y_max, h_max, v_max) = coord_to_hex(ox + aabb3d.x + aabb3d.width,
-                                                oy + aabb3d.y,
-                                                oz + aabb3d.z + aabb3d.depth)
+    # Origin, the bottom center corner of the hexagon.
+    (x_min, y_min, _, v_min) = coord_to_hex(ox + aabb3d.x,
+                                            oy + aabb3d.y,
+                                            oz + aabb3d.z)
+
+    # NOTE: Top, bottom, right and left refer to the corners of the hexagon.
+
+    # Bottom Right
+    (_, _, h_max, _) = coord_to_hex(ox + aabb3d.x + aabb3d.width,
+                                    oy + aabb3d.y,
+                                    oz + aabb3d.z)
+
+    # Top Right
+    (x_max, _, _, _) = coord_to_hex(ox + aabb3d.x + aabb3d.width,
+                                    oy + aabb3d.y,
+                                    oz + aabb3d.z + aabb3d.depth)
+    # Bottom Left
+    (_, _, h_min, _) = coord_to_hex(ox + aabb3d.x,
+                                    oy + aabb3d.y + aabb3d.height,
+                                    oz + aabb3d.z)
+
+    # Top left
+    (_, y_max, _, _) = coord_to_hex(ox + aabb3d.x,
+                                    oy + aabb3d.y + aabb3d.height,
+                                    oz + aabb3d.z + aabb3d.depth)
+
+    # Top
+    (_, _, _, v_max) = coord_to_hex(ox + aabb3d.x + aabb3d.width,
+                                    oy + aabb3d.y + aabb3d.height,
+                                    oz + aabb3d.z + aabb3d.depth)
 
     return Hexagon(x_min, x_max, y_min, y_max, h_min, h_max, v_min, v_max)
 
