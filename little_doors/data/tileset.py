@@ -5,7 +5,8 @@ from little_doors.tile import Tile
 
 def create_tile_set():
     tiles = [
-        Tile(1, "template", resource_filename='./resources/art/tile-template.png', anchor=(16.0, 8.0), depth=2.0),
+        Tile(1, "template", resource_filename='./resources/art/tile-template.png', anchor=(16.0, 8.0), depth=2.0,
+             size=(1.0, 1.0, 1.0)),
     ]
 
     images = dict()

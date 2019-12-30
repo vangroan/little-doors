@@ -34,7 +34,7 @@ class Terrain(object):
         self._data = [0] * length
         self._tile_set = dict()
         self._sprites = [None] * length  # type: List[Optional[pyglet.sprite.Sprite]]
-        self._aabbs = [None] * length  # type: List[Optional[AABB3D]]
+        self._aabb = [None] * length  # type: List[Optional[AABB3D]]
         self._batch = pyglet.graphics.Batch()
 
     @property
@@ -59,6 +59,10 @@ class Terrain(object):
     def set_cell(self, x, y, tile_index):
         """
         Sets the cell at the given position to the tile given via the tile index.
+
+        :type x: int
+        :type y: int
+        :type tile_index: int
         """
         data_index = x + y * self._size[0]  # type: int
         self._data[data_index] = tile_index
@@ -75,10 +79,13 @@ class Terrain(object):
 
             (i, j, _k) = cart_to_iso(x, y, 0)
             (ax, ay) = tile.anchor
-            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32 - ax, y=j * 32 - ay)
+            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32.0 - ax, y=j * 32.0 - ay)
 
-            size = tile.size  # type: Optional[tuple[float, float]]
-            self._aabbs[data_index] = AABB3D(x, y, 0, tile.size[0], tile.size[1], 0)
+            # Currently only supports a single level, so everything is on z-level 0
+            self._aabb[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
+
+    def get_cell_aabb3d(self, x, y):
+        return self._aabb[x + y * self._size[0]]
 
     def draw(self):
         (width, height) = self._size
