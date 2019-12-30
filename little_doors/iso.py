@@ -1,7 +1,6 @@
 """
 Isometric projection.
 """
-from collections import namedtuple
 
 from little_doors.aabb import AABB3D
 
