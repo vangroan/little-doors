@@ -1,3 +1,6 @@
+# TODO: Weak references to handlers
+
+
 class EventError(Exception):
     pass
 
