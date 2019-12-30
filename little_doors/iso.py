@@ -107,7 +107,7 @@ class Hexagon(object):
         self.v_min = v_min
         self.v_max = v_max
 
-    def hex_overlap(self, other):
+    def overlaps(self, other):
         """
         Tests whether the two given hexes (calculated using ``hex_bounds()``) overlap.
 
@@ -116,9 +116,12 @@ class Hexagon(object):
         """
         hex1_xmin, hex1_xmax, hex1_ymin, hex1_ymax, hex1_hmin, hex1_hmax, _, _ = self
         hex2_xmin, hex2_xmax, hex2_ymin, hex2_ymax, hex2_hmin, hex2_hmax, _, _ = other
-        return not (hex1_xmin >= hex2_xmax or hex2_xmin >= hex1_xmax) \
-               or not (hex1_ymin >= hex2_ymax or hex2_ymin >= hex1_ymax) \
-               or not (hex1_hmin >= hex2_hmax or hex2_hmin >= hex1_hmax)
+        return (hex1_xmin < hex2_xmax and hex2_xmin < hex1_xmax) \
+               and (hex1_ymin < hex2_ymax and hex2_ymin < hex1_ymax) \
+               and (hex1_hmin < hex2_hmax and hex2_hmin < hex1_hmax)
+        # return not (hex1_xmin >= hex2_xmax or hex2_xmin >= hex1_xmax) \
+        #        or not (hex1_ymin >= hex2_ymax or hex2_ymin >= hex1_ymax) \
+        #        or not (hex1_hmin >= hex2_hmax or hex2_hmin >= hex1_hmax)
 
     def __iter__(self):
         yield self.x_min
