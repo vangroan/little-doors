@@ -20,6 +20,33 @@ class AABB3D(object):
         self.height = height
         self.depth = depth
 
+    def separation(self, other):
+        """
+        Determines how this bounding box and another are separated, described as a tuple that can contain -1, 0 or 1.
+
+        :param other: Another AABB3D box.
+        :return: Tuple with three elements indicating on which side the other box is to this box.
+        """
+        x = 0
+        if self.x >= other.x + other.width:
+            x = -1
+        elif other.x >= self.x + self.width:
+            x = 1
+
+        y = 0
+        if self.y >= other.y + other.height:
+            y = -1
+        elif other.y >= self.y + self.height:
+            y = 1
+
+        z = 0
+        if self.z >= other.z + other.depth:
+            z = -1
+        elif other.z >= self.z + self.depth:
+            z = 1
+
+        return x, y, z
+
     def __repr__(self):
         return "{}(x={}, y={}, z={}, width={}, height={}, depth={})".format(
             self.__class__.__name__, self.x, self.y, self.z, self.width, self.height, self.depth)
