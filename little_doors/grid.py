@@ -80,8 +80,8 @@ class GridIndex2D(object):
         """
         Checks if the given bounding box is in the cell at the given coordinates.
 
-        :param i:
-        :param j:
+        :param i: Index coordinate along x-axis.
+        :param j: Index coordinate along y-axis.
         :param aabb2d: Bounding box.
         :return: True if the bounding box is in the cell.
         """
