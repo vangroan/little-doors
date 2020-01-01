@@ -149,5 +149,10 @@ class GridIndex2D(object):
         raise NotImplementedError()
 
     def index_in_bounds(self, i, j):
+        """
+        Checks whether the given cell coordinates are inside the index's bounds.
+
+        :return: True if within bounds.
+        """
         m, n = self._dim
         return 0 <= i < m and 0 <= j < n
