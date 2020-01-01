@@ -85,7 +85,10 @@ class GridIndex2D(object):
         :param aabb2d: Bounding box.
         :return: True if the bounding box is in the cell.
         """
-        return aabb2d in self._data[i + j * self._dim[0]]
+        cell = self._data[i + j * self._dim[0]]
+        if cell is not None:
+            return aabb2d in cell
+        return False
 
     def insert(self, aabb2d):
         """
@@ -120,8 +123,48 @@ class GridIndex2D(object):
         the removal will miss it.
 
         :param aabb2d: 2D axis aligned bounding box.
+        :return: Count of cells the aabb2d was removed from.
         """
-        raise NotImplementedError()
+        count = 0
+        for i, j in self.cells_overlapped(aabb2d):
+            index = i + j * self._dim[0]
+
+            cell = self._data[index]
+            if cell is not None:
+                try:
+                    cell.remove(aabb2d)
+                    count += 1
+
+                    # Empty cells are None
+                    if not len(cell):
+                        self._data[index] = None
+
+                except KeyError:
+                    # Set does not contain element
+                    pass
+
+        return count
+
+    def purge(self, *aabb2ds):
+        """
+        An expensive remove operation that scans the whole grid to remove the given bounding box.
+
+        :param aabb2ds: One or more bounding boxes to remove, in bulk.
+        :return: Count of cells the aabb2d was removed from.
+        """
+        count = 0
+
+        for cell in self._data:
+            if cell is not None:
+                for aabb in aabb2ds:
+                    try:
+                        cell.remove(aabb)
+                        count += 1
+                    except KeyError:
+                        # Set does not contain element
+                        pass
+
+        return count
 
     def recalculate(self):
         """

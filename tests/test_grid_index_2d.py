@@ -69,3 +69,30 @@ def test_insert_same_cell():
     assert grid.cell_contains(16, 16, aabb1)
     assert grid.cell_contains(16, 16, aabb2)
     assert grid.cell_contains(16, 16, aabb3)
+
+
+def test_remove():
+    """
+    Should remove bounding boxes from cells.
+    """
+    # assume
+    grid = GridIndex2D(position=(-512.0, -512.0), dimensions=(32, 32), cell_size=(32.0, 32.0))
+    aabb1 = AABB2D(0.0, 0.0, 32.0, 32.0)
+    aabb2 = AABB2D(0.0, 0.0, 64.0, 64.0)
+    aabb3 = AABB2D(-32.0, -32.0, 64.0, 64.0)
+    insert_count1 = grid.insert(aabb1)
+    insert_count2 = grid.insert(aabb2)
+    insert_count3 = grid.insert(aabb3)
+
+    # act
+    remove_count1 = grid.remove(aabb1)
+    remove_count2 = grid.remove(aabb2)
+    remove_count3 = grid.remove(aabb3)
+
+    # assert
+    assert not grid.cell_contains(16, 16, aabb1)
+    assert not grid.cell_contains(16, 16, aabb2)
+    assert not grid.cell_contains(16, 16, aabb3)
+    assert insert_count1 == remove_count1
+    assert insert_count2 == remove_count2
+    assert insert_count3 == remove_count3
