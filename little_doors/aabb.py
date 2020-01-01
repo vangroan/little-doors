@@ -63,3 +63,20 @@ class AABB2D(object):
         self.y = y
         self.width = width
         self.height = height
+
+    def overlap(self, other):
+        """
+        Tests whether this bounding box overlaps with the other given box-like.
+
+        :param other: Iterable that unpacks into (x, y, width, height)
+        :return: True if they overlap
+        """
+        (x1, y1, w1, h1) = self
+        (x2, y2, w2, h2) = other
+        raise NotImplementedError()
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.width
+        yield self.height
