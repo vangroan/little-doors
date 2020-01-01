@@ -52,8 +52,7 @@ class GridIndex2D(object):
         #
         # An empty cell is represented by None.
         width, height = dimensions
-        max_data = int(width / cell_size[0]) * int(height / cell_size[1])
-        self._data = [None] * max_data  # type: List[Optional[Set[AABB2D]]]
+        self._data = [None] * (width * height)  # type: List[Optional[Set[AABB2D]]]
 
     def cells_overlapped(self, aabb2d) -> Tuple[int, int]:
         """
@@ -77,23 +76,41 @@ class GridIndex2D(object):
                 if self.index_in_bounds(i, j):
                     yield i, j
 
+    def cell_contains(self, i, j, aabb2d):
+        """
+        Checks if the given bounding box is in the cell at the given coordinates.
+
+        :param i:
+        :param j:
+        :param aabb2d: Bounding box.
+        :return: True if the bounding box is in the cell.
+        """
+        return aabb2d in self._data[i + j * self._dim[0]]
+
     def insert(self, aabb2d):
         """
         Inserts a bounding box into the index.
 
-        :param aabb2d:
-        :return:
+        :param aabb2d: Bounding box.
+        :return: Count of cells the bounding box was inserted into.
         """
+        count = 0
+
         # Determine in which cells the bound box belongs
         for i, j in self.cells_overlapped(aabb2d):
             index = i + j * int(self._dim[0])
 
             cell = self._data[index]
             if cell is None:
-                self._data[index] = set(aabb2d)
-            else:
-                # Note set will deduplicate
-                cell.insert(aabb2d)
+                cell = set()
+                self._data[index] = cell
+
+            # Note set will deduplicate
+            cell.add(aabb2d)
+
+            count += 1
+
+        return count
 
     def remove(self, aabb2d):
         """
