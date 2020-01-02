@@ -96,3 +96,23 @@ def test_remove():
     assert insert_count1 == remove_count1
     assert insert_count2 == remove_count2
     assert insert_count3 == remove_count3
+
+
+def test_find_by_aabb():
+    """
+    Should find the inserted bounding boxes.
+    """
+    # assume
+    grid = GridIndex2D(position=(-512.0, -512.0), dimensions=(32, 32), cell_size=(32.0, 32.0))
+    aabb1 = AABB2D(0.0, 0.0, 32.0, 32.0)
+    aabb2 = AABB2D(0.0, 0.0, 64.0, 64.0)
+    aabb3 = AABB2D(-32.0, -32.0, 64.0, 64.0)
+    grid.insert(aabb1)
+    grid.insert(aabb2)
+    grid.insert(aabb3)
+
+    # act
+    boxes = grid.find(AABB2D(0.0, 0.0, 32.0, 32.0))
+
+    # assert
+    assert {aabb1, aabb2, aabb3} == set(boxes)

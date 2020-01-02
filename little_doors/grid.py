@@ -177,19 +177,25 @@ class GridIndex2D(object):
         """
         Queries the index for nearby neighbours.
 
-        :param query: Either an aabb2d or a tuple with a 2D position.
+        :param query: Either an aabb2d or a tuple with a 2D position. When query is a tuple, the
+            coordinates must be in pixels.
         :return: Iterator over nearby neighbours.
         """
         if type(query) is tuple:
             # Position
-            pass
+            raise NotImplementedError("Query by position not implemented yet")
+
         elif type(query) is AABB2D:
             # Bounding box
-            pass
+            for i, j in self.cells_overlapped(query):
+                if self.index_in_bounds(i, j):
+                    index = i + j * self._dim[0]
+                    cell = self._data[index]
+                    if cell is not None:
+                        for aabb in cell:
+                            yield aabb
         else:
             raise TypeError("Grid spatial index cannot query using %s" % type(query).__name__)
-
-        raise NotImplementedError()
 
     def index_in_bounds(self, i, j):
         """
