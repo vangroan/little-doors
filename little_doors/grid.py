@@ -1,5 +1,5 @@
 from math import floor
-from typing import Tuple, List, Optional, Set
+from typing import Tuple, List, Optional, Set, Generator
 
 from little_doors.aabb import AABB2D
 
@@ -54,12 +54,12 @@ class GridIndex2D(object):
         width, height = dimensions
         self._data = [None] * (width * height)  # type: List[Optional[Set[AABB2D]]]
 
-    def cells_overlapped(self, aabb2d) -> Tuple[int, int]:
+    def cells_overlapped(self, aabb2d) -> Generator[Tuple[int, int], None, None]:
         """
         Helper to determine which cells the given bounding box overlaps.
 
         :param aabb2d: Target bounding box to test against.
-        :return: Iterator of tuples containing cell indexes, 2D positions, and dimensions.
+        :return: Generator yielding tuples containing cell indexes.
         """
         cell_w, cell_h = self._cell_size
         offset_x, offset_y = self._pos
@@ -68,7 +68,7 @@ class GridIndex2D(object):
         x1, y1 = int(aabb2d.x - offset_x), int(aabb2d.y - offset_y)
         x2, y2 = x1 + int(aabb2d.width), y1 + int(aabb2d.height)
 
-        # ``range`` semantics does the heavy lifting here
+        # ``range`` semantics do the heavy lifting of stepping between cells
         for y in range(y1, y2, int(cell_h)):
             for x in range(x1, x2, int(cell_w)):
                 i, j = int(floor(x / cell_w)), int(floor(y / cell_h))
@@ -76,9 +76,35 @@ class GridIndex2D(object):
                 if self.index_in_bounds(i, j):
                     yield i, j
 
+    def box_overlaps(self, i, j, aabb2d) -> bool:
+        """
+        Checks if the given bounding box overlaps with the given point.
+
+        The bounding box does not need to have been inserted into in grid. This can be used
+        to check whether a bounding box belongs in a cell or not.
+
+        :type j: int
+        :type i: int
+        :type aabb2d: AABB2D
+        :param i: Index coordinate along x-axis.
+        :param j: Index coordinate along y-axis.
+        :param aabb2d: Bounding box.
+        :return: True if the bounding box overlaps the cell.
+        """
+
+        cell_w, cell_h = self._cell_size
+        offset_x, offset_y = self._pos
+
+        # Prepare an aabb2d-like tuple to leverage aabb2d overlap test
+        x, y = offset_x + i * cell_w, offset_y + j * cell_h
+
+        return aabb2d.overlap((x, y, cell_w, cell_h))
+
     def cell_contains(self, i, j, aabb2d):
         """
-        Checks if the given bounding box is in the cell at the given coordinates.
+        Checks if the given bounding box is inside the cell bucket at the given coordinates.
+
+        The bounding box must have been inserted into the grid for it to be contained.
 
         :param i: Index coordinate along x-axis.
         :param j: Index coordinate along y-axis.
@@ -90,9 +116,12 @@ class GridIndex2D(object):
             return aabb2d in cell
         return False
 
-    def insert(self, aabb2d):
+    def insert(self, aabb2d) -> int:
         """
         Inserts a bounding box into the index.
+
+        Importantly, a bounding box will not be inserted more than once into a cell. This
+        method is safe to call multiple times.
 
         :param aabb2d: Bounding box.
         :return: Count of cells the bounding box was inserted into.
@@ -115,7 +144,7 @@ class GridIndex2D(object):
 
         return count
 
-    def remove(self, aabb2d):
+    def remove(self, aabb2d) -> int:
         """
         Removes the given bounding box from the index.
 
@@ -127,25 +156,40 @@ class GridIndex2D(object):
         """
         count = 0
         for i, j in self.cells_overlapped(aabb2d):
-            index = i + j * self._dim[0]
-
-            cell = self._data[index]
-            if cell is not None:
-                try:
-                    cell.remove(aabb2d)
-                    count += 1
-
-                    # Empty cells are None
-                    if not len(cell):
-                        self._data[index] = None
-
-                except KeyError:
-                    # Set does not contain element
-                    pass
+            if self._remove_coord(i, j, aabb2d):
+                count += 1
 
         return count
 
-    def purge(self, *aabb2ds):
+    def _remove_coord(self, i, j, aabb2d):
+        """
+        Removes the given bounding box from the cell at coordinates i and j, regardless if
+        the box's belongs there or not.
+
+        :param i: Index coordinate along x-axis.
+        :param j: Index coordinate along y-axis.
+        :param aabb2d: Bounding box.
+        :return: True if the cell contained the bounding box, false if it didnt.
+        """
+
+        index = i + j * self._dim[0]
+
+        cell = self._data[index]
+        if cell is not None:
+            try:
+                cell.remove(aabb2d)
+                # Empty cells are None
+                if not len(cell):
+                    self._data[index] = None
+                return True
+
+            except KeyError:
+                # Set does not contain element
+                pass
+
+        return False
+
+    def purge(self, *aabb2ds) -> int:
         """
         An expensive remove operation that scans the whole grid to remove the given bounding box.
 
@@ -171,7 +215,45 @@ class GridIndex2D(object):
         Scans the entire index and moves bounding boxes between cells if their properties (position or size) has
         changed.
         """
-        raise NotImplementedError()
+        # Mark inserts and removals to avoid mutating cell buckets during iteration.
+        removals = []  # type: List[Tuple[int, int, AABB2d]]
+
+        # Deduplicate inserts.
+        #
+        # Teh same bounding boxes may be mark for removal from
+        # multiple cells. For the move operation, we only need
+        # perform a single insert.
+        inserts = set()
+
+        width, height = self._dim
+
+        for j in range(height):
+            for i in range(width):
+                index = i + j * width
+                cell = self._data[index]
+                if cell is not None:
+                    for aabb2d in cell:
+                        # Check if the current i and j overlap with this aabb2d.
+                        if not self.box_overlaps(i, j, aabb2d):
+                            # Bounding box does not belong in this cell, and probably
+                            # needs to be inserted somewhere else.
+                            removals.append((i, j, aabb2d))
+
+                        # The box may need to be inserted somewhere else.
+                        #
+                        # Exclude testing the current i and j, since this is where
+                        # we retrieved the box to begin with.
+                        other = filter(lambda p: p != (i, j), self.cells_overlapped(aabb2d))
+                        for k, l in other:
+                            if self.box_overlaps(k, l, aabb2d) and not self.cell_contains(k, l, aabb2d):
+                                inserts.add(aabb2d)
+
+        for i, j, aabb2d in removals:
+            self._remove_coord(i, j, aabb2d)
+
+        for aabb2d in inserts:
+            # Importantly the insert operation must deduplicate.
+            self.insert(aabb2d)
 
     def find(self, query):
         """
@@ -194,6 +276,7 @@ class GridIndex2D(object):
                     if cell is not None:
                         for aabb in cell:
                             yield aabb
+
         else:
             raise TypeError("Grid spatial index cannot query using %s" % type(query).__name__)
 

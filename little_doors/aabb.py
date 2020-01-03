@@ -1,3 +1,7 @@
+# noinspection PyUnresolvedReferences
+from typing import Union, Tuple
+
+
 class AABB3D(object):
     """
     3-Dimensional axis aligned bounding box.
@@ -59,21 +63,42 @@ class AABB2D(object):
     __slots__ = ('x', 'y', 'width', 'height')
 
     def __init__(self, x, y, width, height):
+        """
+        :type x: float
+        :type y: float
+        :type width: float
+        :type height: float
+        """
         self.x = x
         self.y = y
         self.width = width
         self.height = height
 
+    @property
+    def pos(self) -> Tuple[float, float]:
+        """
+        Bounding box position.
+        """
+        return self.x, self.y
+
+    @pos.setter
+    def pos(self, pair):
+        """
+        :type pair: Tuple[float, float]
+        """
+        self.x, self.y = pair
+
     def overlap(self, other):
         """
         Tests whether this bounding box overlaps with the other given box-like.
 
-        :param other: Iterable that unpacks into (x, y, width, height)
+        :type other: Union[AABB2D, Tuple[float, float, float, float]]
+        :param other: Generator that unpacks into (x, y, width, height)
         :return: True if they overlap
         """
         (x1, y1, w1, h1) = self
         (x2, y2, w2, h2) = other
-        raise NotImplementedError()
+        return x1 <= x2 + w2 and x2 <= x1 + w1 and y1 <= y2 + h2 and y2 <= y1 + h1
 
     def __iter__(self):
         yield self.x
