@@ -51,7 +51,7 @@ class PixelCamera(object):
 
         :returns: A tuple with the new x and y values
         """
-        return x * self._size_factor, y * self._size_factor
+        return self._x + x * self._size_factor, self._y + y * self._size_factor
 
     def clear(self):
         glClear(gl.GL_COLOR_BUFFER_BIT)

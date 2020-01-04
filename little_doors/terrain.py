@@ -2,7 +2,7 @@ from typing import Optional, Any, List, Union
 
 import pyglet
 
-from little_doors.aabb import AABB3D
+from little_doors.aabb import AABB3D, AABB2D
 from little_doors.iso import cart_to_iso
 from little_doors.tile import Tile
 
@@ -31,10 +31,12 @@ class Terrain(object):
         length = size[0] * size[1]
 
         self._size = size
+        self._tile_size_2d = (32.0, 32.0)
         self._data = [0] * length
         self._tile_set = dict()
         self._sprites = [None] * length  # type: List[Optional[pyglet.sprite.Sprite]]
-        self._aabb = [None] * length  # type: List[Optional[AABB3D]]
+        self._aabb3d = [None] * length  # type: List[Optional[AABB3D]]
+        self._aabb2d = [None] * length  # type: List[Optional[AABB2D]]
         self._batch = pyglet.graphics.Batch()
 
     @property
@@ -77,15 +79,21 @@ class Terrain(object):
             if not tile:
                 raise TileSetError("tile set does not contain tile for index %s" % tile_index)
 
-            (i, j, _k) = cart_to_iso(x, y, 0)
-            (ax, ay) = tile.anchor
-            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, x=i * 32.0 - ax, y=j * 32.0 - ay)
+            tile_w, tile_h = self._tile_size_2d
+            i, j, _k = cart_to_iso(x, y, 0)
+            ax, ay = tile.anchor
+            tile_x, tile_y = i * tile_w - ax, j * tile_h - ay
+            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, tile_x, tile_y)
 
             # Currently only supports a single level, so everything is on z-level 0
-            self._aabb[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
+            self._aabb3d[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
+            self._aabb2d[data_index] = AABB2D(tile_x, tile_y, tile_w, tile_h)
 
     def get_cell_aabb3d(self, x, y):
-        return self._aabb[x + y * self._size[0]]
+        return self._aabb3d[x + y * self._size[0]]
+
+    def get_cell_aabb2d(self, x, y):
+        return self._aabb2d[x + y * self._size[0]]
 
     def draw(self):
         (width, height) = self._size
@@ -94,3 +102,8 @@ class Terrain(object):
                 sprite = self._sprites[x + y * width]  # type: Optional[pyglet.sprite.Sprite]
                 if sprite:
                     sprite.draw()
+
+    def __iter__(self):
+        for y in range(self._size[1]):
+            for x in range(self._size[0]):
+                yield x, y

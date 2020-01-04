@@ -23,7 +23,7 @@ class Scene(ABC):
     def on_mouse_release(self, x, y, button, modifiers):
         pass
 
-    def on_mouse_motion(self, context, x, y, dx, dy):
+    def on_mouse_motion(self, x, y, dx, dy):
         pass
 
     def on_draw(self, context):

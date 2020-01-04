@@ -39,7 +39,7 @@ class StartScene(Scene):
         x, y = self.camera.window_to_world(x, y)
         self.menu.on_mouse_release(x, y, button, modifiers)
 
-    def on_mouse_motion(self, context, x, y, dx, dy):
+    def on_mouse_motion(self, x, y, dx, dy):
         x, y = self.camera.window_to_world(x, y)
         self.menu.on_mouse_motion(x, y, dx, dy)
 

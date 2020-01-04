@@ -105,3 +105,7 @@ class AABB2D(object):
         yield self.y
         yield self.width
         yield self.height
+
+    def __repr__(self):
+        return "{}(x={}, y={}, width={}, height={})".format(
+            self.__class__.__name__, self.x, self.y, self.width, self.height)

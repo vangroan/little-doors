@@ -1,4 +1,4 @@
-from math import floor
+from math import floor, ceil
 from typing import Tuple, List, Optional, Set, Generator
 
 from little_doors.aabb import AABB2D
@@ -64,15 +64,16 @@ class GridIndex2D(object):
         cell_w, cell_h = self._cell_size
         offset_x, offset_y = self._pos
 
-        # Convert to integer required for ``range``
-        x1, y1 = int(aabb2d.x - offset_x), int(aabb2d.y - offset_y)
-        x2, y2 = x1 + int(aabb2d.width), y1 + int(aabb2d.height)
+        # Translate the bounding box's coordinates to the grid's coordinate for indexing.
+        x1, y1 = aabb2d.x - offset_x, aabb2d.y - offset_y
+        x2, y2 = x1 + aabb2d.width, y1 + aabb2d.height
 
-        # ``range`` semantics do the heavy lifting of stepping between cells
-        for y in range(y1, y2, int(cell_h)):
-            for x in range(x1, x2, int(cell_w)):
-                i, j = int(floor(x / cell_w)), int(floor(y / cell_h))
+        # Get index bounds for iteration.
+        i_min, j_min = floor(x1 / cell_w), floor(y1 / cell_h)
+        i_max, j_max = ceil(x2 / cell_w), ceil(y2 / cell_h)
 
+        for j in range(int(j_min), int(j_max)):
+            for i in range(int(i_min), int(i_max)):
                 if self.index_in_bounds(i, j):
                     yield i, j
 
@@ -255,13 +256,14 @@ class GridIndex2D(object):
             # Importantly the insert operation must deduplicate.
             self.insert(aabb2d)
 
-    def find(self, query):
+    def find(self, query) -> Generator[Tuple[int, int, AABB2D], None, None]:
         """
         Queries the index for nearby neighbours.
 
+        :type query: Union[AABB2D, Tuple[float, float]]
         :param query: Either an aabb2d or a tuple with a 2D position. When query is a tuple, the
             coordinates must be in pixels.
-        :return: Iterator over nearby neighbours.
+        :return: Generator yielding cell coordinates and nearby neighbours.
         """
         if type(query) is tuple:
             # Position
@@ -275,7 +277,7 @@ class GridIndex2D(object):
                     cell = self._data[index]
                     if cell is not None:
                         for aabb in cell:
-                            yield aabb
+                            yield i, j, aabb
 
         else:
             raise TypeError("Grid spatial index cannot query using %s" % type(query).__name__)
