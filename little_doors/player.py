@@ -16,8 +16,11 @@ class Player(object):
         self._tile_size = tile_size
         self._anchor = (24.0, 8.0)
 
-        self.walk_speed = 4.0
+        self.walk_speed = 6.0
         self.mode = 0
+
+        # The direction in 3D space the player will move in during the next update step.
+        self.dir = (0.0, 0.0, 0.0)
 
         tex = pyglet.image.atlas.TextureAtlas()
         base_tex = tex.add(pyglet.image.load('resources/art/player.png'))
@@ -43,26 +46,29 @@ class Player(object):
 
     def update(self, dt):
         p = self._pos3d
-        diff = self.walk_speed * dt
+        speed = self.walk_speed * dt
+
+        dx, dy, dz = self.dir
+        self.pos3d = p[0] + dx * speed, p[1] + dy * speed, p[2] + dz * speed
 
         # TODO: Remove
         # Just makes the player move around the map
-        if self.mode == 0:
-            self.pos3d = (p[0] + diff, p[1], p[2])
-            if self._pos3d[0] >= 7.0:
-                self.mode = 1
-        elif self.mode == 1:
-            self.pos3d = (p[0], p[1] + diff, p[2])
-            if self._pos3d[1] >= 7.0:
-                self.mode = 2
-        elif self.mode == 2:
-            self.pos3d = (p[0] - diff, p[1], p[2])
-            if self._pos3d[0] <= 0.0:
-                self.mode = 3
-        elif self.mode == 3:
-            self.pos3d = (p[0], p[1] - diff, p[2])
-            if self._pos3d[1] <= 0.0:
-                self.mode = 0
+        # if self.mode == 0:
+        #     self.pos3d = (p[0] + diff, p[1], p[2])
+        #     if self._pos3d[0] >= 7.0:
+        #         self.mode = 1
+        # elif self.mode == 1:
+        #     self.pos3d = (p[0], p[1] + diff, p[2])
+        #     if self._pos3d[1] >= 7.0:
+        #         self.mode = 2
+        # elif self.mode == 2:
+        #     self.pos3d = (p[0] - diff, p[1], p[2])
+        #     if self._pos3d[0] <= 0.0:
+        #         self.mode = 3
+        # elif self.mode == 3:
+        #     self.pos3d = (p[0], p[1] - diff, p[2])
+        #     if self._pos3d[1] <= 0.0:
+        #         self.mode = 0
 
     def draw(self):
         self.sprite.draw()

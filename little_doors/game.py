@@ -29,6 +29,16 @@ class Game:
         if scene:
             scene.on_mouse_motion(x, y, dx, dy)
 
+    def on_key_press(self, symbol, modifiers):
+        scene = self._scenes.top
+        if scene:
+            scene.on_key_press(symbol, modifiers)
+
+    def on_key_release(self, symbol, modifiers):
+        scene = self._scenes.top
+        if scene:
+            scene.on_key_release(symbol, modifiers)
+
     def on_update(self, dt):
         scene = self._scenes.top
         if scene:

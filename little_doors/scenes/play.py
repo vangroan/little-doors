@@ -1,4 +1,5 @@
 from pyglet import gl
+from pyglet.window import key
 
 from little_doors import data
 from little_doors.camera import PixelCamera, pyglet
@@ -7,6 +8,7 @@ from little_doors.iso import cart_to_iso
 from little_doors.player import Player
 from little_doors.scene import Scene
 from little_doors.terrain import Terrain
+from little_doors import vec
 
 
 class PlayScene(Scene):
@@ -14,6 +16,14 @@ class PlayScene(Scene):
         self.terrain = Terrain((8, 8))
         self.camera = PixelCamera()
         self.player = Player(pos3d=(0.0, 0.0, 1.0))
+
+        # Input map
+        self.inputs = {
+            key.A: False,
+            key.D: False,
+            key.W: False,
+            key.S: False,
+        }
 
         # Bounding box indexes
         self.static_grid = GridIndex2D(position=(-1024, -1024), dimensions=(64, 64), cell_size=(32.0, 32.0))
@@ -52,7 +62,38 @@ class PlayScene(Scene):
             if aabb2d is not None:
                 self.static_grid.insert(aabb2d)
 
+    def on_key_press(self, symbol, modifiers):
+        if symbol in self.inputs:
+            self.inputs[symbol] = True
+
+    def on_key_release(self, symbol, modifiers):
+        if symbol in self.inputs:
+            self.inputs[symbol] = False
+
     def on_update(self, dt):
+        x, y, z = 0.0, 0.0, 0.0
+
+        # Left
+        if self.inputs[key.A]:
+            x -= 1.0
+            y += 1.0
+
+        # Right
+        if self.inputs[key.D]:
+            x += 1.0
+            y -= 1.0
+
+        # Down
+        if self.inputs[key.S]:
+            x -= 1.0
+            y -= 1.0
+
+        # Up
+        if self.inputs[key.W]:
+            x += 1.0
+            y += 1.0
+
+        self.player.dir = vec.normalize(x, y, z)
         self.player.update(dt)
 
     def on_draw(self, context):

@@ -12,6 +12,16 @@ window = pyglet.window.Window(
 
 
 @window.event
+def on_key_press(symbol, modifiers):
+    game.on_key_press(symbol, modifiers)
+
+
+@window.event
+def on_key_release(symbol, modifiers):
+    game.on_key_release(symbol, modifiers)
+
+
+@window.event
 def on_mouse_motion(x, y, dx, dy):
     game.on_mouse_motion(x, y, dx, dy)
 

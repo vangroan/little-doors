@@ -59,6 +59,12 @@ class DimetricScene(Scene):
             if aabb2d is not None:
                 self.static_grid.insert(aabb2d)
 
+        # Sort static tiles.
+        for x, y in self.terrain:
+            aabb2d = self.terrain.get_cell_aabb2d(x, y)
+            for neigh in self.static_grid.find(aabb2d):
+                pass
+
     def on_mouse_release(self, x, y, button, modifiers):
         print("Mouse Screen", x, y)
 
