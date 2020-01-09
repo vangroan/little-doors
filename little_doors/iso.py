@@ -1,6 +1,7 @@
 """
 Isometric projection.
 """
+import functools
 
 from little_doors.aabb import AABB3D
 
@@ -138,3 +139,37 @@ class Hexagon(object):
             self.__class__.__name__,
             self.x_min, self.x_max, self.y_min, self.y_max,
             self.h_min, self.h_max, self.v_min, self.v_max)
+
+
+def create_dimetric_cmp(tilemap):
+    """
+    :type tilemap: Terrain
+    :param tilemap:
+    :param grid_index_2ds:
+    :return:
+    """
+
+    def dimetric_cmp(a, b) -> int:
+        a_index, a_i, a_j = a
+        b_index, b_i, b_j = b
+
+        # a_aabb2d, b_aabb2d = tilemap.get_cell_aabb2d(a_i, a_j), tilemap.get_cell_aabb2d(b_i, b_j)
+        a_aabb3d, b_aabb3d = tilemap.get_cell_aabb3d(a_i, a_j), tilemap.get_cell_aabb3d(b_i, b_j)
+
+        # 2D Hex overlap test
+        a_hex, b_hex = hex_bounds(a_aabb3d), hex_bounds(a_aabb3d)
+        if not a_hex.overlaps(b_hex):
+            return 0
+
+        # 3D bounding box separation test
+        x, y, z = a_aabb3d.separation(b_aabb3d)
+        if x > 0:
+            return -1
+        if y > 0:
+            return -1
+        if z > 0:
+            return 1
+
+        return 0
+
+    return functools.cmp_to_key(dimetric_cmp)

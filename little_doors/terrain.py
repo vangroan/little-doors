@@ -1,10 +1,17 @@
-from typing import Optional, Any, List, Union
+from enum import Enum
+from typing import Optional, Any, List, Union, Tuple, Callable
 
 import pyglet
 
+from little_doors.mixins import MapObjectMixin, DrawableMixin
 from little_doors.aabb import AABB3D, AABB2D
-from little_doors.iso import cart_to_iso
+from little_doors.iso import cart_to_iso, create_dimetric_cmp
 from little_doors.tile import Tile
+
+
+class DrawableKind(Enum):
+    TILE = 1
+    OBJECT = 2
 
 
 class TileSetError(Exception):
@@ -34,9 +41,11 @@ class Terrain(object):
         self._tile_size_2d = (32.0, 32.0)
         self._data = [0] * length
         self._tile_set = dict()
+        self._objects = []  # type: List[object]
         self._sprites = [None] * length  # type: List[Optional[pyglet.sprite.Sprite]]
         self._aabb3d = [None] * length  # type: List[Optional[AABB3D]]
         self._aabb2d = [None] * length  # type: List[Optional[AABB2D]]
+        self._draw_order = []  # type: List[Tuple[int, int, int]]
         self._batch = pyglet.graphics.Batch()
 
     @property
@@ -89,11 +98,40 @@ class Terrain(object):
             self._aabb3d[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
             self._aabb2d[data_index] = AABB2D(tile_x, tile_y, tile_w, tile_h)
 
+    def get_sprite(self, x, y):
+        return self._sprites[x + y * self._size[0]]
+
     def get_cell_aabb3d(self, x, y):
         return self._aabb3d[x + y * self._size[0]]
 
     def get_cell_aabb2d(self, x, y):
         return self._aabb2d[x + y * self._size[0]]
+
+    def add_object(self, obj):
+        """
+        Adds an object, to be managed and drawn by the tile map.
+
+        :type obj: MapObjectMixin
+        :param obj:
+        """
+        self._objects.append(obj)
+
+    def _build_draw_order(self):
+        tiles = filter(lambda e: self.get_sprite(e[1], e[2]),
+                       ((DrawableKind.TILE, coord[0], coord[1]) for idx, coord in enumerate(self)))
+
+        # TODO: Determine
+        objects = ((DrawableKind.OBJECT, 0, 0) for obj in self._objects)
+        # tiles.sort(key=create_dimetric_cmp(self.terrain), reverse=True)
+
+    def sort(self, key_func):
+        """
+        Sorts the drawables in an order that they can be rendered using the painter's algorithm (back to front).
+
+        :type key_func: Callable[[Tuple[DrawableKind, int, int]], int]
+        :param key_func: A callable that takes a tuple and returns an integer.
+        """
+        pass
 
     def draw(self):
         (width, height) = self._size

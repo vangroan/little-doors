@@ -1,9 +1,13 @@
+from abc import ABC
+
 import pyglet
 
+from little_doors.aabb import AABB3D
 from little_doors.iso import cart_to_iso
+from little_doors.mixins import MapObjectMixin, Box3DMixin, DrawableMixin
 
 
-class Player(object):
+class Player(MapObjectMixin, Box3DMixin, DrawableMixin, object):
 
     def __init__(self, pos3d=(0.0, 0.0, 0.0), tile_size=(32.0, 32.0, 16.0)):
         """
@@ -15,6 +19,7 @@ class Player(object):
         self._pos3d = (0.0, 0.0, 0.0)
         self._tile_size = tile_size
         self._anchor = (24.0, 8.0)
+        self._aabb3d = AABB3D(0.0, 0.0, 0.0, 32.0, 32.0, 32.0)
 
         self.walk_speed = 6.0
         self.mode = 0
@@ -43,6 +48,10 @@ class Player(object):
         self.sprite.x = (i * ti) - ax
         self.sprite.y = (j * tj + k * tk) - ay
         self._pos3d = val
+
+    @property
+    def aabb3d(self) -> AABB3D:
+        return self._aabb3d
 
     def update(self, dt):
         p = self._pos3d
