@@ -88,9 +88,9 @@ class DimetricScene(Scene):
         self.camera.push_state()
 
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-        # self.terrain.draw()
-        for idx, i, j in self.tiles:
-            sprite = self.terrain.get_sprite(i, j)
-            sprite.draw()
+        self.terrain.draw()
+        # for idx, i, j in self.tiles:
+        #     sprite = self.terrain.get_sprite(i, j)
+        #     sprite.draw()
 
         self.camera.pop_state()

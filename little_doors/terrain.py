@@ -1,11 +1,12 @@
+from copy import deepcopy
 from enum import Enum
-from typing import Optional, Any, List, Union, Tuple, Callable
+from typing import Optional, List, Tuple
 
 import pyglet
 
-from little_doors.mixins import MapObjectMixin, DrawableMixin
 from little_doors.aabb import AABB3D, AABB2D
-from little_doors.iso import cart_to_iso, create_dimetric_cmp
+from little_doors.iso import cart_to_iso
+from little_doors.mixins import MapObjectMixin
 from little_doors.tile import Tile
 
 
@@ -39,14 +40,14 @@ class Terrain(object):
 
         self._size = size
         self._tile_size_2d = (32.0, 32.0)
-        self._data = [0] * length
+        # self._data = [0] * length
+        self._tiles = [None] * length  # type: List[Optional[Tile]]
         self._tile_set = dict()
         self._objects = []  # type: List[object]
         self._sprites = [None] * length  # type: List[Optional[pyglet.sprite.Sprite]]
         self._aabb3d = [None] * length  # type: List[Optional[AABB3D]]
         self._aabb2d = [None] * length  # type: List[Optional[AABB2D]]
         self._draw_order = []  # type: List[Tuple[int, int, int]]
-        self._batch = pyglet.graphics.Batch()
 
     @property
     def tile_size_2d(self):
@@ -76,27 +77,41 @@ class Terrain(object):
         :type tile_index: int
         """
         data_index = x + y * self._size[0]  # type: int
-        self._data[data_index] = tile_index
+        # self._data[data_index] = tile_index
+        #
+        # if self._sprites[data_index]:
+        #     self._sprites[data_index].delete()
+        #     self._sprites[data_index] = None
 
-        if self._sprites[data_index]:
-            self._sprites[data_index].delete()
-            self._sprites[data_index] = None
+        # Release resources
+        if self._tiles[data_index]:
+            self._tiles[data_index].delete()
+            self._tiles[data_index] = None
 
         # Only create sprite when not zero
         if tile_index:
-            tile = self._tile_set.get(tile_index, None)  # type: Optional[Tile]
-            if not tile:
+            tile_prototype = self._tile_set.get(tile_index, None)  # type: Optional[Tile]
+            if not tile_prototype:
                 raise TileSetError("tile set does not contain tile for index %s" % tile_index)
 
             tile_w, tile_h = self._tile_size_2d
             i, j, _k = cart_to_iso(x, y, 0)
-            ax, ay = tile.anchor
+            ax, ay = tile_prototype.anchor
             tile_x, tile_y = i * tile_w - ax, j * tile_h - ay
-            self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, tile_x, tile_y)
+
+            tile = deepcopy(tile_prototype)
+            tile.sprite = pyglet.sprite.Sprite(tile.image, tile_x, tile_y)
+            tile.aabb3d.pos = float(x), float(y), 0.0
+            tile.aabb2d.pos = tile_x, tile_y
+            self._tiles[data_index] = tile
+            # self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, tile_x, tile_y)
 
             # Currently only supports a single level, so everything is on z-level 0
-            self._aabb3d[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
-            self._aabb2d[data_index] = AABB2D(tile_x, tile_y, tile_w, tile_h)
+            # self._aabb3d[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
+            # self._aabb2d[data_index] = AABB2D(tile_x, tile_y, tile_w, tile_h)
+
+    def get_tile(self, x, y):
+        return self._tiles[x + y * self._size[0]]
 
     def get_sprite(self, x, y):
         return self._sprites[x + y * self._size[0]]
@@ -137,9 +152,9 @@ class Terrain(object):
         (width, height) = self._size
         for x in range(width - 1, -1, -1):
             for y in range(height - 1, -1, -1):
-                sprite = self._sprites[x + y * width]  # type: Optional[pyglet.sprite.Sprite]
-                if sprite:
-                    sprite.draw()
+                tile = self._tiles[x + y * width]  # type: Optional[Tile]
+                if tile:
+                    tile.sprite.draw()
 
     def __iter__(self):
         for y in range(self._size[1]):

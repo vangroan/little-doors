@@ -51,6 +51,18 @@ class AABB3D(object):
 
         return x, y, z
 
+    @property
+    def dimensions(self):
+        return self.width, self.height, self.depth
+
+    @property
+    def pos(self):
+        return self.x, self.y, self.z
+
+    @pos.setter
+    def pos(self, pos):
+        self.x, self.y, self.z = pos
+
     def __repr__(self):
         return "{}(x={}, y={}, z={}, width={}, height={}, depth={})".format(
             self.__class__.__name__, self.x, self.y, self.z, self.width, self.height, self.depth)
