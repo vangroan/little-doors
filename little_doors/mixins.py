@@ -31,8 +31,8 @@ class Box3DMixin(ABC):
     Objects that can collide in 3-dimensional space.
     """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def aabb3d(self) -> AABB3D:
         """
         Bounding box that reflects the object's position and size in 3-dimensional space.
