@@ -27,7 +27,7 @@ class TerrainError(Exception):
     """
 
 
-class Terrain(object):
+class TileMap(object):
     """
     2-Dimensional tile map.
     """

@@ -8,7 +8,7 @@ from little_doors.camera import PixelCamera
 from little_doors.grid import GridIndex2D
 from little_doors.iso import hex_bounds, create_dimetric_cmp
 from little_doors.scene import Scene
-from little_doors.terrain import Terrain
+from little_doors.tilemap import TileMap
 
 
 class DimetricScene(Scene):
@@ -21,7 +21,7 @@ class DimetricScene(Scene):
         self.camera = PixelCamera()
 
         # Tile map
-        self.terrain = Terrain((8, 8))
+        self.tilemap = TileMap((8, 8))
         self.tiles = []
 
         # Bounding box indexes
@@ -31,8 +31,8 @@ class DimetricScene(Scene):
     def start(self, context):
         self.camera.set_position(-160.0, -64.0)
 
-        self.terrain.load_tile_set(data.tileset.create_tile_set())
-        self.terrain.load_tile_data([
+        self.tilemap.load_tile_set(data.tileset.create_tile_set())
+        self.tilemap.load_tile_data([
             1, 1, 1, 1, 1, 1, 1, 1,
             1, 0, 0, 1, 1, 0, 0, 1,
             1, 0, 1, 1, 1, 1, 0, 1,
@@ -55,15 +55,15 @@ class DimetricScene(Scene):
         # ])
 
         # Index bounding boxes that are not expected to change.
-        for x, y in self.terrain:
-            aabb2d = self.terrain.get_cell_aabb2d(x, y)
+        for x, y in self.tilemap:
+            aabb2d = self.tilemap.get_cell_aabb2d(x, y)
             if aabb2d is not None:
                 self.static_grid.insert(aabb2d)
 
-        tiles = filter(lambda e: self.terrain.get_sprite(e[1], e[2]),
-                       ((idx, coord[0], coord[1]) for idx, coord in enumerate(self.terrain)))
+        tiles = filter(lambda e: self.tilemap.get_sprite(e[1], e[2]),
+                       ((idx, coord[0], coord[1]) for idx, coord in enumerate(self.tilemap)))
         tiles = list(tiles)
-        tiles.sort(key=create_dimetric_cmp(self.terrain), reverse=True)
+        tiles.sort(key=create_dimetric_cmp(self.tilemap), reverse=True)
         self.tiles = tiles
 
     def on_mouse_release(self, x, y, button, modifiers):
@@ -88,7 +88,7 @@ class DimetricScene(Scene):
         self.camera.push_state()
 
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-        self.terrain.draw()
+        self.tilemap.draw()
         # for idx, i, j in self.tiles:
         #     sprite = self.terrain.get_sprite(i, j)
         #     sprite.draw()
