@@ -1,10 +1,13 @@
+from abc import abstractmethod
 from copy import deepcopy
 from enum import Enum
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 import pyglet
+from typing_extensions import Protocol
 
 from little_doors.aabb import AABB3D, AABB2D
+from little_doors.deprecate import deprecated
 from little_doors.iso import cart_to_iso
 from little_doors.mixins import MapObjectMixin
 from little_doors.tile import Tile
@@ -25,6 +28,56 @@ class TerrainError(Exception):
     """
     Error while working with terrain data.s
     """
+
+
+class MapObject(Protocol):
+    """
+    Contract for a game object that is managed by a tile map.
+
+    Game objects need to adhere to the following requirements to be added to a tile map:
+    - Have a presence in 2-dimensional world space.
+    - Have a presence in 3-dimensional space.
+    - Can be drawn to a render target.
+    """
+
+    @property
+    @abstractmethod
+    def aabb2d(self):
+        """
+        Bounding box that reflects the object's position and size in 2-dimensional space.
+
+        The 2D space is in world space, not screen space, before it has been transformed by the camera.
+
+        Should return a reference to the bounding box object, and not a copy, because the reference is
+        used as the box's identity in collections and spatial indexes.
+
+        The position of the box should be kept up to date with the object's position in 2D space.
+
+        :return: Reference to a 2D bounding box.
+        """
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def aabb3d(self):
+        """
+        Bounding box that reflects the object's position and size in 3-dimensional space.
+
+        Should return a reference to the bounding box object, and not a copy, because the reference is
+        used as the box's identity in collections and spatial indexes.
+
+        The position of the box should be kept up to date with the object's position in 3D space.
+
+        :return: Reference to a 3D bounding box.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def draw(self):
+        """
+        Renders the map object.
+        """
+        raise NotImplementedError()
 
 
 class TileMap(object):
@@ -56,7 +109,7 @@ class TileMap(object):
         """
         return 32.0, 32.0
 
-    def load_tile_set(self, tile_set):
+    def load_tile_set(self, tile_set: Dict[int, Tile]):
         self._tile_set.update(tile_set)
 
     def load_tile_data(self, data):
@@ -113,12 +166,15 @@ class TileMap(object):
     def get_tile(self, x, y):
         return self._tiles[x + y * self._size[0]]
 
+    @deprecated
     def get_sprite(self, x, y):
         return self._sprites[x + y * self._size[0]]
 
+    @deprecated
     def get_cell_aabb3d(self, x, y):
         return self._aabb3d[x + y * self._size[0]]
 
+    @deprecated
     def get_cell_aabb2d(self, x, y):
         return self._aabb2d[x + y * self._size[0]]
 
