@@ -42,7 +42,7 @@ class MapObject(Protocol):
 
     @property
     @abstractmethod
-    def aabb2d(self):
+    def aabb2d(self) -> AABB2D:
         """
         Bounding box that reflects the object's position and size in 2-dimensional space.
 
@@ -59,7 +59,7 @@ class MapObject(Protocol):
 
     @property
     @abstractmethod
-    def aabb3d(self):
+    def aabb3d(self) -> AABB3D:
         """
         Bounding box that reflects the object's position and size in 3-dimensional space.
 
@@ -96,7 +96,7 @@ class TileMap(object):
         # self._data = [0] * length
         self._tiles = [None] * length  # type: List[Optional[Tile]]
         self._tile_set = dict()
-        self._objects = []  # type: List[object]
+        self._objects = []  # type: List[MapObject]
         self._sprites = [None] * length  # type: List[Optional[pyglet.sprite.Sprite]]
         self._aabb3d = [None] * length  # type: List[Optional[AABB3D]]
         self._aabb2d = [None] * length  # type: List[Optional[AABB2D]]
@@ -182,7 +182,7 @@ class TileMap(object):
         """
         Adds an object, to be managed and drawn by the tile map.
 
-        :type obj: MapObjectMixin
+        :type obj: MapObject
         :param obj:
         """
         self._objects.append(obj)
