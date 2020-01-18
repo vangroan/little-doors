@@ -1,11 +1,12 @@
+import itertools
 from copy import deepcopy
 from enum import Enum
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Sequence
 
 import pyglet
 
 from little_doors.aabb import AABB3D, AABB2D
-from little_doors.iso import cart_to_iso
+from little_doors.iso import cart_to_iso, topological_sort
 from little_doors.mixins import MapObjectMixin
 from little_doors.tile import Tile
 
@@ -131,13 +132,11 @@ class TileMap(object):
         """
         self._objects.append(obj)
 
-    def _build_draw_order(self):
-        tiles = filter(lambda e: self.get_sprite(e[1], e[2]),
-                       ((DrawableKind.TILE, coord[0], coord[1]) for idx, coord in enumerate(self)))
-
-        # TODO: Determine
-        objects = ((DrawableKind.OBJECT, 0, 0) for obj in self._objects)
-        # tiles.sort(key=create_dimetric_cmp(self.terrain), reverse=True)
+    def _build_draw_order(self, spatial_index) -> Sequence[MapObjectMixin]:
+        tiles = map(lambda c: self.get_tile(c[0], c[1]), (coord for coord in self))
+        tiles = filter(lambda tile: tile is not None, tiles)
+        objects = (obj for obj in self._objects)
+        return topological_sort(itertools.chain(tiles, objects), spatial_index)
 
     def sort(self, key_func):
         """
@@ -148,13 +147,10 @@ class TileMap(object):
         """
         pass
 
-    def draw(self):
-        (width, height) = self._size
-        for x in range(width - 1, -1, -1):
-            for y in range(height - 1, -1, -1):
-                tile = self._tiles[x + y * width]  # type: Optional[Tile]
-                if tile:
-                    tile.sprite.draw()
+    def draw(self, spatial_index):
+        ordered_objects = self._build_draw_order(spatial_index)
+        for obj in ordered_objects:
+            obj.draw()
 
     def __iter__(self):
         for y in range(self._size[1]):

@@ -1,10 +1,18 @@
+import itertools
+from abc import ABC
 from math import floor, ceil
 from typing import Tuple, List, Optional, Set, Generator
 
 from little_doors.aabb import AABB2D
 
 
-class GridIndex2D(object):
+class SpatialIndex2D(ABC):
+
+    def find(self, query) -> Generator[Tuple[int, int, AABB2D], None, None]:
+        raise NotImplementedError()
+
+
+class GridIndex2D(SpatialIndex2D):
     """
     Spatial index that stores 2D axis aligned bounding boxes in a fixed grid. Bounding boxes are stored in cells, and
     boxes that overlap multiple cells are stored in each overlapped cell.
@@ -217,7 +225,7 @@ class GridIndex2D(object):
         changed.
         """
         # Mark inserts and removals to avoid mutating cell buckets during iteration.
-        removals = []  # type: List[Tuple[int, int, AABB2d]]
+        removals = []  # type: List[Tuple[int, int, AABB2D]]
 
         # Deduplicate inserts.
         #
@@ -290,3 +298,13 @@ class GridIndex2D(object):
         """
         m, n = self._dim
         return 0 <= i < m and 0 <= j < n
+
+
+class IndexGroup2D(SpatialIndex2D):
+
+    def __init__(self, first_index, *indexes):
+        self._indexes = (first_index,) + indexes
+
+    def find(self, query) -> Generator[object, None, None]:
+        for n in itertools.chain(*(idx.find(query) for idx in self._indexes)):
+            yield n

@@ -1,7 +1,8 @@
 """
 Isometric projection.
 """
-import functools
+from collections import deque
+from enum import Enum
 
 from little_doors.aabb import AABB3D
 
@@ -141,35 +142,78 @@ class Hexagon(object):
             self.h_min, self.h_max, self.v_min, self.v_max)
 
 
-def create_dimetric_cmp(tilemap):
+def is_behind(a, b) -> bool:
     """
-    :type tilemap: Terrain
-    :param tilemap:
-    :param grid_index_2ds:
+    :type a: AABB3D
+    :type b: AABB3D
+    :return: True if a is behind b.
+    """
+    x, y, z = a.separation(b)
+    if x != 0:
+        return a.x < b.x
+    elif y != 0:
+        return a.y < b.y
+    elif z != 0:
+        return a.z > b.z
+    return False
+
+
+def is_in_front(a, b) -> bool:
+    """
+    :type a: AABB3D
+    :type b: AABB3D
+    :return: True if b is in front of a.
+    """
+    x, y, z = a.separation(b)
+    if x != 0:
+        return b.x + b.width < a.x + a.width
+    elif y != 0:
+        return b.y + b.height < a.y + a.height
+    elif z != 0:
+        return b.z + b.depth > a.y + a.depth
+    return False
+
+
+class NodeState(Enum):
+    GREY = 0
+    BLACK = 1
+
+
+def topological_sort(objects, spatial_index):
+    """
+    :type objects: Iterator[object]
+    :type spatial_index: SpatialIndex2D
     :return:
     """
+    result = deque()
+    enter = set(objects)
+    state = {}
 
-    def dimetric_cmp(a, b) -> int:
-        a_index, a_i, a_j = a
-        b_index, b_i, b_j = b
+    lookup = {obj.aabb2d: obj for obj in enter}
 
-        # a_aabb2d, b_aabb2d = tilemap.get_cell_aabb2d(a_i, a_j), tilemap.get_cell_aabb2d(b_i, b_j)
-        a_aabb3d, b_aabb3d = tilemap.get_cell_aabb3d(a_i, a_j), tilemap.get_cell_aabb3d(b_i, b_j)
+    def _sort(node):
+        state[node] = NodeState.GREY
 
-        # 2D Hex overlap test
-        a_hex, b_hex = hex_bounds(a_aabb3d), hex_bounds(a_aabb3d)
-        if not a_hex.overlaps(b_hex):
-            return 0
+        for _i, _j, k in spatial_index.find(node.aabb2d):
+            nk = lookup.get(k, None)
+            sk = state.get(nk, None)
 
-        # 3D bounding box separation test
-        x, y, z = a_aabb3d.separation(b_aabb3d)
-        if x > 0:
-            return -1
-        if y > 0:
-            return -1
-        if z > 0:
-            return 1
+            if not is_behind(nk.aabb3d, node.aabb3d):
+                continue
 
-        return 0
+            if sk == NodeState.GREY:
+                # raise ValueError("cycle")
+                continue
+            if sk == NodeState.BLACK:
+                continue
 
-    return functools.cmp_to_key(dimetric_cmp)
+            enter.discard(nk)
+            _sort(nk)
+
+        result.appendleft(node)
+        state[node] = NodeState.BLACK
+
+    while enter:
+        _sort(enter.pop())
+
+    return result
