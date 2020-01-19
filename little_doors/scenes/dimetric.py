@@ -9,6 +9,7 @@ from little_doors import data, vec
 from little_doors.aabb import AABB2D
 from little_doors.camera import PixelCamera
 from little_doors.grid import GridIndex2D, IndexGroup2D
+from little_doors.physics import PhysicsWorld3D
 from little_doors.player import Player
 from little_doors.scene import Scene
 from little_doors.tilemap import TileMap
@@ -36,6 +37,9 @@ class DimetricScene(Scene):
         # Bounding box indexes
         self.static_grid = GridIndex2D(position=(-1024, -1024), dimensions=(64, 64), cell_size=(32.0, 32.0))
         self.dynamic_grid = GridIndex2D(position=(-1024, -1024), dimensions=(64, 64), cell_size=(32.0, 32.0))
+
+        # Physics
+        self.physics = PhysicsWorld3D()
 
         # FPS Counter
         self.fps_cursor = 0
