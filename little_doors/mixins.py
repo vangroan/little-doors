@@ -7,6 +7,8 @@ from abc import ABC, abstractmethod
 from little_doors.aabb import AABB3D
 
 
+# TODO: Remove mixins and replace with Protocols
+
 # noinspection PyAttributeOutsideInit
 class MapObjectMixin(ABC):
     def __new__(cls, *args, **kwargs):

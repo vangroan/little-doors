@@ -5,7 +5,6 @@ from typing import Optional, List, Tuple, Sequence
 
 import pyglet
 
-from little_doors.aabb import AABB3D, AABB2D
 from little_doors.iso import cart_to_iso, topological_sort
 from little_doors.mixins import MapObjectMixin
 from little_doors.tile import Tile
@@ -41,13 +40,9 @@ class TileMap(object):
 
         self._size = size
         self._tile_size_2d = (32.0, 32.0)
-        # self._data = [0] * length
         self._tiles = [None] * length  # type: List[Optional[Tile]]
         self._tile_set = dict()
         self._objects = []  # type: List[object]
-        self._sprites = [None] * length  # type: List[Optional[pyglet.sprite.Sprite]]
-        self._aabb3d = [None] * length  # type: List[Optional[AABB3D]]
-        self._aabb2d = [None] * length  # type: List[Optional[AABB2D]]
         self._draw_order = []  # type: List[Tuple[int, int, int]]
 
     @property
@@ -78,11 +73,6 @@ class TileMap(object):
         :type tile_index: int
         """
         data_index = x + y * self._size[0]  # type: int
-        # self._data[data_index] = tile_index
-        #
-        # if self._sprites[data_index]:
-        #     self._sprites[data_index].delete()
-        #     self._sprites[data_index] = None
 
         # Release resources
         if self._tiles[data_index]:
@@ -105,23 +95,9 @@ class TileMap(object):
             tile.aabb3d.pos = float(x), float(y), 0.0
             tile.aabb2d.pos = tile_x, tile_y
             self._tiles[data_index] = tile
-            # self._sprites[data_index] = pyglet.sprite.Sprite(tile.image, tile_x, tile_y)
-
-            # Currently only supports a single level, so everything is on z-level 0
-            # self._aabb3d[data_index] = AABB3D(float(x), float(y), 0.0, tile.size[0], tile.size[1], tile.size[2])
-            # self._aabb2d[data_index] = AABB2D(tile_x, tile_y, tile_w, tile_h)
 
     def get_tile(self, x, y):
         return self._tiles[x + y * self._size[0]]
-
-    def get_sprite(self, x, y):
-        return self._sprites[x + y * self._size[0]]
-
-    def get_cell_aabb3d(self, x, y):
-        return self._aabb3d[x + y * self._size[0]]
-
-    def get_cell_aabb2d(self, x, y):
-        return self._aabb2d[x + y * self._size[0]]
 
     def add_object(self, obj):
         """
