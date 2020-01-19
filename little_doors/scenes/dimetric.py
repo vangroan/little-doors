@@ -47,11 +47,11 @@ class DimetricScene(Scene):
 
         self.tilemap.load_tile_set(data.tileset.create_tile_set())
         self.tilemap.load_tile_data([
-            1, 1, 1, 1, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0, 0, 0,
-            1, 0, 1, 1, 0, 0, 0, 0,
-            1, 0, 1, 0, 0, 0, 0, 0,
+            3, 5, 0, 1, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
+            1, 0, 1, 1, 3, 0, 0, 0,
+            1, 0, 1, 4, 0, 0, 0, 0,
+            2, 0, 2, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
@@ -66,12 +66,6 @@ class DimetricScene(Scene):
 
         self.tilemap.add_object(self.player)
         self.dynamic_grid.insert(self.player.aabb2d)
-
-        # tiles = filter(lambda e: self.tilemap.get_sprite(e[1], e[2]),
-        #                ((idx, coord[0], coord[1]) for idx, coord in enumerate(self.tilemap)))
-        # tiles = list(tiles)
-        # tiles.sort(key=create_dimetric_cmp(self.tilemap), reverse=True)
-        # self.tiles = tiles
 
     def on_mouse_release(self, x, y, button, modifiers):
         print("Mouse Screen", x, y)
@@ -102,7 +96,6 @@ class DimetricScene(Scene):
         self.fps_cursor = self.fps_cursor % len(self.delta_times)
         avg_delta_time = reduce(lambda d, agg: agg + d, self.delta_times, 0.0) / len(self.delta_times)
         self.fps_counter.text = "FPS: {0:.2f}".format(1.0 / avg_delta_time if avg_delta_time > 0.0 else 0.0)
-        # self.fps_counter.text = "FPS: {:2}".format(avg_delta_time)
 
         x, y, z = 0.0, 0.0, 0.0
 

@@ -127,7 +127,7 @@ class TileMap(object):
         """
         Adds an object, to be managed and drawn by the tile map.
 
-        :type obj: MapObjectMixin
+        :type obj: MapObject
         :param obj:
         """
         self._objects.append(obj)
