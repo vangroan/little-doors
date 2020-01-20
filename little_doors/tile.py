@@ -1,5 +1,4 @@
 from little_doors.aabb import AABB3D, AABB2D
-from little_doors.mixins import MapObjectMixin
 
 # Size of tile along each axis when no size is specified.
 DEFAULT_DIMENSION = 1.0

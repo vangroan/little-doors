@@ -1,6 +1,8 @@
 # noinspection PyUnresolvedReferences
 from typing import Union, Tuple
 
+from typing_extensions import Protocol
+
 
 class AABB3D(object):
     """
@@ -121,3 +123,33 @@ class AABB2D(object):
     def __repr__(self):
         return "{}(x={}, y={}, width={}, height={})".format(
             self.__class__.__name__, self.x, self.y, self.width, self.height)
+
+
+class Spatial3D(Protocol):
+    """
+    Bounding box that reflects the object's position and size in 3-dimensional space.
+
+    Should return a reference to the bounding box object, and not a copy, because the reference is
+    used as the box's identity in collections and spatial indexes.
+
+    The position of the box should be kept up to date with the object's position in 3D space.
+
+    :return: Reference to a 3D bounding box.
+    """
+    aabb3d: AABB3D
+
+
+class Spatial2D(Protocol):
+    """
+    Bounding box that reflects the object's position and size in 2-dimensional space.
+
+    The 2D space is in world space, not screen space, before it has been transformed by the camera.
+
+    Should return a reference to the bounding box object, and not a copy, because the reference is
+    used as the box's identity in collections and spatial indexes.
+
+    The position of the box should be kept up to date with the object's position in 2D space.
+
+    :return: Reference to a 2D bounding box.
+    """
+    aabb2d: AABB2D

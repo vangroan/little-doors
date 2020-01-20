@@ -4,10 +4,12 @@ from enum import Enum
 from typing import Optional, List, Tuple, Sequence
 
 import pyglet
+from typing_extensions import Protocol
 
-from little_doors.aabb import AABB3D, AABB2D
-from little_doors.iso import cart_to_iso, topological_sort
-from little_doors.mixins import MapObjectMixin
+from little_doors.iso import topological_sort
+from little_doors.aabb import AABB3D, AABB2D, Spatial2D, Spatial3D
+from little_doors.drawable import Drawable
+from little_doors.iso import cart_to_iso
 from little_doors.tile import Tile
 
 
@@ -26,6 +28,18 @@ class TerrainError(Exception):
     """
     Error while working with terrain data.s
     """
+
+
+class MapObject(Drawable, Spatial3D, Spatial2D, Protocol):
+    """
+    Contract for a game object that is managed by a tile map.
+
+    Game objects need to adhere to the following requirements to be added to a tile map:
+    - Have a presence in 2-dimensional world space.
+    - Have a presence in 3-dimensional space.
+    - Can be drawn to a render target.
+    """
+    pass
 
 
 class TileMap(object):
@@ -132,7 +146,7 @@ class TileMap(object):
         """
         self._objects.append(obj)
 
-    def _build_draw_order(self, spatial_index) -> Sequence[MapObjectMixin]:
+    def _build_draw_order(self, spatial_index) -> Sequence[MapObject]:
         tiles = map(lambda c: self.get_tile(c[0], c[1]), (coord for coord in self))
         tiles = filter(lambda tile: tile is not None, tiles)
         objects = (obj for obj in self._objects)

@@ -1,13 +1,10 @@
-from abc import ABC
-
 import pyglet
 
 from little_doors.aabb import AABB3D, AABB2D
 from little_doors.iso import cart_to_iso
-from little_doors.mixins import Box3DMixin, DrawableMixin
 
 
-class Player(Box3DMixin, DrawableMixin, object):
+class Player(object):
 
     def __init__(self, pos3d=(0.0, 0.0, 0.0), tile_size=(32.0, 32.0, 16.0)):
         """
