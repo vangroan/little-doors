@@ -63,6 +63,14 @@ class AABB3D(object):
     def pos(self, pos):
         self.x, self.y, self.z = pos
 
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.z
+        yield self.width
+        yield self.height
+        yield self.depth
+
     def __repr__(self):
         return "{}(x={}, y={}, z={}, width={}, height={}, depth={})".format(
             self.__class__.__name__, self.x, self.y, self.z, self.width, self.height, self.depth)
