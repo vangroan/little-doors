@@ -24,6 +24,16 @@ def subtract(a, b) -> Tuple[float, float, float]:
     return a[0] - b[0], a[1] - b[1], a[2] - b[2]
 
 
+def multiply(v, s):
+    """
+    Multiply a vector with a scalar value.
+    :param v: Tuple[float, float, float]
+    :param s: float
+    :return:
+    """
+    return v[0] * s, v[1] * s, v[2] * s
+
+
 def magnitude(x, y, z):
     return sqrt(x ** 2 + y ** 2 + z ** 2)
 

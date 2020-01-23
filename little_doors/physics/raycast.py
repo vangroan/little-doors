@@ -72,23 +72,55 @@ def cast_grid_ray(position, direction, max_steps=10000, include_start=True, cell
     else:
         step_z, tz = -1, abs(floor(position[2]) - position[2]) * delta_z
 
+    # Current cell coordinate
+    i, j, k = _position_to_cell(position[0], position[1], position[2], cell_size)
+
     # Internal counter for the iterator.
     count = 0
 
     # The starting voxel may be important for the calling
     # algorithm that is doing the ray cast.
     if include_start:
-        i, j, k = _position_to_cell(position[0], position[1], position[2], cell_size)
         yield 0.0, (i, j, k), position
 
     while count < max_steps:
         # Takes current state of shortest axis ray, advances state for
         # next iteration, then unaltered returns state.
-        yield 0.0, (0, 0, 0), (0.0, 0.0, 0.0)
+
+        if tx < ty:
+            if tx < tz:
+                # X-axis
+                info = tx, (i, j, k), vector3.add(position, vector3.multiply(direction, tx))
+                tx += delta_x
+                i += step_x
+                yield info
+            else:
+                # Z-axis
+                info = tz, (i, j, k), vector3.add(position, vector3.multiply(direction, tz))
+                tz += delta_z
+                k += step_z
+                yield info
+        elif ty < tz:
+            if ty < tz:
+                # Y-axis
+                info = ty, (i, j, k), vector3.add(position, vector3.multiply(direction, ty))
+                ty += delta_y
+                j += step_y
+                yield info
+            else:
+                # Z-axis
+                info = tz, (i, j, k), vector3.add(position, vector3.multiply(direction, tz))
+                tz += delta_z
+                k += step_z
+                yield info
+        else:
+            # Z-axis
+            info = tz, (i, j, k), vector3.add(position, vector3.multiply(direction, tz))
+            tz += delta_z
+            k += step_z
+            yield info
 
         count += 1
-
-    raise NotImplementedError()
 
 
 def _position_to_cell(x, y, z, cell_size) -> Tuple[int, int, int]:
@@ -100,6 +132,6 @@ def _position_to_cell(x, y, z, cell_size) -> Tuple[int, int, int]:
 # ----------
 
 def test_raycast():
-    raycast = cast_grid_ray((0.5, 0.5, 0.5), (1.0, 1.0, 1.0), max_steps=10)
+    raycast = cast_grid_ray((0.5, 0.5, 0.5), (0.0, 0.0, 1.0), max_steps=10)
     for ray_info in raycast:
         print(ray_info)
