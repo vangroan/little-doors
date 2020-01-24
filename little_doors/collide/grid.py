@@ -1,9 +1,8 @@
 from collections import defaultdict
 from math import floor, ceil
-from pprint import pprint
 from typing import Tuple, Iterator, Any
 
-from little_doors.physics.aabb import AABB3D
+from little_doors.collide.aabb import AABB3D
 
 
 # TODO: Consider cell size in calculations

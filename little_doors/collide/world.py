@@ -1,7 +1,7 @@
 from typing import Any, Tuple
 
-from little_doors.physics import vector3
-from little_doors.physics.grid import GridIndex3D
+from little_doors.collide import vector3
+from little_doors.collide.grid import GridIndex3D
 from .aabb import AABB3D
 
 

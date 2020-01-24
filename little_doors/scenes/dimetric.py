@@ -9,7 +9,7 @@ from little_doors import data, vec
 from little_doors.aabb import AABB2D
 from little_doors.camera import PixelCamera
 from little_doors.grid import GridIndex2D, IndexGroup2D
-from little_doors.physics import PhysicsWorld3D
+from little_doors.collide import PhysicsWorld3D
 from little_doors.player import Player
 from little_doors.scene import Scene
 from little_doors.tilemap import TileMap

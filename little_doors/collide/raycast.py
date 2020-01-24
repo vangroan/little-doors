@@ -3,7 +3,7 @@ from math import floor, ceil
 from sys import float_info
 from typing import Tuple
 
-from little_doors.physics import vector3
+from little_doors.collide import vector3
 
 
 def cast_grid_ray(position, direction, max_steps=10000, include_start=True, cell_size=(1.0, 1.0, 1.0)) \
