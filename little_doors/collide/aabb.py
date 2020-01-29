@@ -50,6 +50,21 @@ class AABB3D(object):
 
         return x, y, z
 
+    def intersects(self, other) -> bool:
+        """
+        Checks whether this bounding box intersects with another bounding box or box-like object.
+
+        :param other: Another AABB3D box or tuple of bounding box components.
+        :return: True when bounding boxes intersect.
+        """
+        ox_min, oy_min, oz_min, ow, oh, od = other
+        ox_max = ox_min + ow
+        oy_max = oy_min + oh
+        oz_max = oz_min + od
+        return (ox_min < self.x + self.width and self.x < ox_max) \
+               and (oy_min < self.y + self.height and self.y < oy_max) \
+               and (oz_min < self.z + self.depth and self.z < oz_max)
+
     @property
     def dimensions(self) -> Tuple[float, float, float]:
         """

@@ -8,8 +8,8 @@ from pyglet.window import key
 from little_doors import data, vec
 from little_doors.aabb import AABB2D
 from little_doors.camera import PixelCamera
-from little_doors.grid import GridIndex2D, IndexGroup2D
 from little_doors.collide import PhysicsWorld3D
+from little_doors.grid import GridIndex2D, IndexGroup2D
 from little_doors.player import Player
 from little_doors.scene import Scene
 from little_doors.tilemap import TileMap
@@ -67,9 +67,12 @@ class DimetricScene(Scene):
             if tile is not None:
                 if tile.aabb2d is not None:
                     self.static_grid.insert(tile.aabb2d)
+                    self.physics.add(tile, tile.aabb3d.pos, tile.aabb3d.dimensions)
 
         self.tilemap.add_object(self.player)
         self.dynamic_grid.insert(self.player.aabb2d)
+
+        self.physics.add(self.player, self.player.aabb3d.pos, self.player.aabb3d.dimensions)
 
     def on_mouse_release(self, x, y, button, modifiers):
         print("Mouse Screen", x, y)
@@ -132,6 +135,10 @@ class DimetricScene(Scene):
             z -= 1.0
 
         self.player.dir = vec.normalize(x, y, z)
+
+        # Project before actual update
+        self.physics.project(self.player.aabb3d, self.player.velocity(dt))
+
         self.player.update(dt)
 
         self.dynamic_grid.recalculate()

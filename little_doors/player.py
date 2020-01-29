@@ -1,5 +1,3 @@
-from abc import ABC
-
 import pyglet
 
 from little_doors.aabb import AABB3D, AABB2D
@@ -60,6 +58,11 @@ class Player(Box3DMixin, DrawableMixin, object):
     @property
     def aabb3d(self) -> AABB3D:
         return self._aabb3d
+
+    def velocity(self, dt):
+        speed = self.walk_speed * dt
+        dx, dy, dz = self.dir
+        return dx * speed, dy * speed, dz * speed
 
     def update(self, dt):
         p = self._pos3d

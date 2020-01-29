@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Tuple
 
 from little_doors.collide import vector3
 from little_doors.collide.grid import GridIndex3D
@@ -73,8 +73,11 @@ class PhysicsWorld3D(object):
             if neigh_aabb3d is aabb3d:
                 continue
 
-            # TODO: Cast rays from corners
-            # TODO: Test for collision
+            # Test neighbour against the projected bounding
+            # box for collision.
+            if neigh_aabb3d.intersects((dx_min, dy_min, dz_min, w, h, d)):
+                print("Intersects with ({}, {})".format(neigh_item, neigh_aabb3d))
+
             # TODO: Backtrack until not colliding
             # TODO: Determine separating axis
             # TODO: Get separation normal

@@ -63,6 +63,10 @@ class AABB3D(object):
     def pos(self, pos):
         self.x, self.y, self.z = pos
 
+    @property
+    def position(self):
+        return self.x, self.y, self.z
+
     def __iter__(self):
         yield self.x
         yield self.y
